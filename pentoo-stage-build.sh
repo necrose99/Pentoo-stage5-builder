@@ -1,7 +1,7 @@
 #!/bin/bash
 ####################
 #
-# file: unsqasher.sh
+# file: pentoo-stage-build.sh
 #
 # Unpack Pentoo ISO's into /tmp/$dirs
 #
@@ -15,7 +15,7 @@
 # %    %%%% %  u^uuu %%     | |         ==#
 #       %%%% %%%%%%%%%      | |           V
 ### Brought to you by Necrose99 , Put a Scythe to your problem shall we...
-# some items swiped from https://github.com/greglook/toolkit-packages/blob/master/gentoo/stage4-backup.sh
+# some items swiped from https://github.com/greglook/toolkit-packages/blob/master/gentoo/stage4-backup.sh or inspired by/of. 
 #####################################################################################
 
 dir[0]=/tmp/pentoo-amd64-default 
@@ -48,12 +48,12 @@ else
 
 }
 # where to put the stage5
-stage5Location=${STAGE5_LOCATION:-$HOME/stage5/}
+stage5Location=${STAGE5_LOCATION:-$HOME/stage5/$pv/}
 
 # name prefix
 stage5prefix=`pentoo`-stage5-`date +\%Y.\%m.\%d`
 #shards 
-stage5Location=${STAGE5_LOCATION:-$HOME/stage5/}
+stage5shards=${STAGE5_LOCATION:-$HOME/stage5/$pv/}
 pentoo=${arch}${stub}
 pv=${pentoo}
 #########################################################################################
@@ -93,12 +93,18 @@ done
 
 pack_shards () {
 
-        mkdir /home/pentoo/shards/$PV
+       mkdir /home/pentoo/shards/$PV
  
-       | split -d -b 450m - /home/pentoo/shards/
+      # | split -d -b 450m - /home/pentoo/shards/
 }
-customerArray=(customer1 customer2 customer3 customer4 customer5)
-for customerName in ${customerArray[*]}
+# srv mmm salty (saltstack pilars etc...) 
+packArray=( bin boot etc home lib32 lib64 opt root run sbin media  usr var srv )
+# split 
+packArray=( dev media mnt tmp  var srv )
+tar -cvpzf VARS$$$ --exclude=
+# chuck to a few KB file.
+for packArray in ${packArray[*]}
+for packArray1 in ${packArray[*]}
 do
   mkdir -p /home/$customerName/{outbound,outbound_backup,dropoff}
 done
@@ -119,6 +125,7 @@ done
 unset dir
 
 fi 
+
 
 # create the final command
 if [ "$tar_output" == "--file" ]; then
