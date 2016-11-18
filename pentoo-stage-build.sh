@@ -15,25 +15,64 @@
 # %    %%%% %  u^uuu %%     | |         ==#
 #       %%%% %%%%%%%%%      | |           V
 ### Brought to you by Necrose99 , Put a Scythe to your problem shall we...
+# some items swiped from https://github.com/greglook/toolkit-packages/blob/master/gentoo/stage4-backup.sh
 #####################################################################################
 
 dir[0]=/tmp/pentoo-amd64-default 
 dir[1]=/tmp/pentoo-amd64-hardened
 dir[2]=/tmp/pentoo-x86-default 
 dir[3]=/tmp/pentoo-x86-hardened
-file=cut -d':' -f1 /tmp/ ${ $dir[$i]}
-# where to put the stage4
-stage4Location=${STAGE4_LOCATION:-$HOME/backups}
+
+################################ spinner function , sure thiers a prettier way with cut /tmp = archive name but for now its more work
+spiner() {
+if
+while true dir[0]=/tmp/pentoo-amd64-default
+set arch=-amd64
+set stub=-default
+else
+if
+while dir[1]=/tmp/pentoo-amd64-hardened
+set arch=-amd64
+set stub=-hardened
+else
+if
+while dir[2]=/tmp/pentoo-x86-default
+set arch=-x86
+set stub=-hardened
+else
+if
+while dir[3]=/tmp/pentoo-x86-default
+set arch=-x86
+set stub=-default
+else
+
+}
+# where to put the stage5
+stage5Location=${STAGE5_LOCATION:-$HOME/stage5/}
 
 # name prefix
-stage5prefix=`hostname`-stage4-`date +\%Y.\%m.\%d`
+stage5prefix=`pentoo`-stage5-`date +\%Y.\%m.\%d`
+#shards 
+stage5Location=${STAGE5_LOCATION:-$HOME/stage5/}
+pentoo=${arch}${stub}
+pv=${pentoo}
 #########################################################################################
+setup_resolv
 pack_stage5
 pack_shards
 unsquashfs_rootfs
 FINAL_clean
 
-################################################
+########################## fix /etc/resolv.conf to work as Docker LXC, Chroot etc. 
+setup_resolv() {
+    cat >>${ $dir[$i]}/etc/resolv.conf <<EOF
+nameserver 8.8.8.8 
+nameserver 8.8.4.4 
+nameserver 2001:4860:4860::8888 
+nameserver 2001:4860:4860::8844
+EOF
+## should be persistive globally, google public dns else others will update# 
+}
 
 pack_stage5() {
 
@@ -53,15 +92,16 @@ done
 # cat *tar.gz* | tar -xvpzf - -C / 
 
 pack_shards () {
-for (( i = 0 ; i < ${#dir[@]} ; i++ ))
-do
-        mkdir /home/pentoo/shards/
+
+        mkdir /home/pentoo/shards/$PV
  
        | split -d -b 450m - /home/pentoo/shards/
-done
-
 }
-
+customerArray=(customer1 customer2 customer3 customer4 customer5)
+for customerName in ${customerArray[*]}
+do
+  mkdir -p /home/$customerName/{outbound,outbound_backup,dropoff}
+done
 
 ################### FINAL Clean out clean out all the temp files in rootfs dirs. 
 FINAL_clean() {
@@ -80,17 +120,13 @@ unset dir
 
 fi 
 
-################################################## not perfect but might be better if cleaned up latter.
-### Pack named tarballs however need to improve my loop handelers. 
-#mk_pentoo_tarball() {
-### EDIT Segments For As needed. 
-arch="x86"   # x86 amd64 , 
-# ARM7 arm8-64 could also be done in docker however bases would need AMD64 (host)  quemu ARM-Seed 
-## Should I get a Server I may. 
-stub="hardened"  # hardened default. some bash magic could be added hear too... 
-year="2015.0"
-release="RC4.0"
-end="tar.bz2"  ### curently docker suports tar.gz .tar.bz2 .tar.xz
-style="-xvjf"   ### -cvpzf (tar.gz) -cJf (tar.xz) -xvjf (tar.bz2)  tar cf - <source folder> | 7z a -si <Destination archive>.tar.7z
-tar $style Pentoo_Linux_"$arch"_"$stub"_"$year"_"$release""$end" --exclude=/$style Pentoo_Linux_"$arch"_"$stub"_"$year"_"$release""$end" --one-file-system / 
-#### 
+# create the final command
+if [ "$tar_output" == "--file" ]; then
+	tar_command="$find_command | $tar $zip $tarOptions $verbose --file $stage4Name.$stage4postfix --no-recursion -T -"
+else
+	tar_command="$find_command | $tar $zip $tarOptions $verbose --no-recursion -T - | split $split_options - "$stage4Name.$stage4postfix"_"
+fi
+
+if [ "$verbose" ]; then
+	echo -ne "\n* creating the stage4 in $stage4Location with the following command:\n\n"$tar_command
+fi
