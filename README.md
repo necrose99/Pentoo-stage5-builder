@@ -45,4 +45,5 @@ ENV LC_ALL=en_US.UTF-8
 # fire up the chroot in the cloud...
 # Say hello
 
-echo "Bootstrapped Pentoo into /: and the cloud happy building.. " ls --color -lah ``
+echo "Bootstrapped Pentoo into /: and the cloud happy building.. " ls --color -lah `
+`
