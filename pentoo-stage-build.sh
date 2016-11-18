@@ -21,7 +21,12 @@ dir[0]=/tmp/pentoo-amd64-default
 dir[1]=/tmp/pentoo-amd64-hardened
 dir[2]=/tmp/pentoo-x86-default 
 dir[3]=/tmp/pentoo-x86-hardened
+file=cut -d':' -f1 /tmp/ ${ $dir[$i]}
+# where to put the stage4
+stage4Location=${STAGE4_LOCATION:-$HOME/backups}
 
+# name prefix
+stage5prefix=`hostname`-stage4-`date +\%Y.\%m.\%d`
 #########################################################################################
 pack_stage5
 pack_shards
@@ -35,19 +40,24 @@ pack_stage5() {
 for (( i = 0 ; i < ${#dir[@]} ; i++ ))
 do
         mkdir /home/pentoo/stage5/
-        
-        tar -cvjSf ${ $dir[$i]}.tar.bz2   /home/pentoo/stage5/
+        tar -cvpzf /home/pentoo/stage5/pentoo-amd64-default.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
+        tar -cvpzf /home/pentoo/stage5/pentoo-amd64-hardened.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-hardened-default
+        tar -cvpzf /home/pentoo/stage5/pentoo-x86-default.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-x86-default
+        tar -cvpzf /home/pentoo/stage5/pentoo-x86-hardened.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
 done
 
 }
 
 
+############## build "shards" just if the files to big offten dockerhub will crash the machine during build. 
+# cat *tar.gz* | tar -xvpzf - -C / 
 
 pack_shards () {
 for (( i = 0 ; i < ${#dir[@]} ; i++ ))
 do
         mkdir /home/pentoo/shards/
-       tar -cvjSf ${ $dir[$i]}.tar.bz2 | split -d -b 450m - /home/pentoo/shards/
+ 
+       | split -d -b 450m - /home/pentoo/shards/
 done
 
 }
