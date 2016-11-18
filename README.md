@@ -26,6 +26,8 @@ doing a docker file it will download each shard and if from scratch drop and unp
 
 Zcat may or may not be on the busybox base image for gentoo , then using rflap etc pain in the arse. and trying to abuse the Gentoo official builder script .. etc.. , and just making clean tarballs to alow dockerhub / Quay.io to unpack and re-merge into the root-fs simple clean , but you can always re-cat them back if you want too.
 
+###### 
+
 `
 FROM scratch
 MAINTAINER Necrose99
