@@ -27,7 +27,7 @@ doing a docker file it will download each shard and if from scratch drop and unp
 #### Example using "Shards"  , 
 Zcat may or may not be on the busybox base image for gentoo , then using rflap etc pain in the arse. and trying to abuse the gentoo offical builder script .. etc..  , and just making clean tarballs to alow dockerhub / Quay.io to unpack and re-merge into the root-fs simple clean , but you can always re-cat them back if you want too. 
 
-
+<code>
 FROM scratch
 MAINTAINER Necrose99
 VOLUME /var/lib/layman:rw, /usr/portage:rw", /usr/portage/distfiles:rw, 
@@ -47,3 +47,4 @@ ENV LC_ALL=en_US.UTF-8
 # Say hello
 echo "Bootstrapped  Pentoo  into /:   and the cloud happy building.. "
 ls --color -lah
+</code>
