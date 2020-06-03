@@ -18,33 +18,18 @@
 # some items swiped from https://github.com/greglook/toolkit-packages/blob/master/gentoo/stage4-backup.sh or inspired by/of. 
 #####################################################################################
 
-dir[0]=/tmp/pentoo-amd64-default 
-dir[1]=/tmp/pentoo-amd64-hardened
-dir[2]=/tmp/pentoo-x86-default 
-dir[3]=/tmp/pentoo-x86-hardened
+dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
+dir[1]=/tmp/pentoo-full-beta-x86-hardened-latest
 
 ################################ spinner function , sure thiers a prettier way with cut /tmp = archive name but for now its more work
 spiner() {
 if
-while true dir[0]=/tmp/pentoo-amd64-default
-set arch=-amd64
-set stub=-default
+while true dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
+
 else
 if
 while dir[1]=/tmp/pentoo-amd64-hardened
-set arch=-amd64
-set stub=-hardened
-else
-if
-while dir[2]=/tmp/pentoo-x86-default
-set arch=-x86
-set stub=-hardened
-else
-if
-while dir[3]=/tmp/pentoo-x86-default
-set arch=-x86
-set stub=-default
-else
+fi
 
 }
 # where to put the stage5
@@ -58,14 +43,19 @@ pentoo=${arch}${stub}
 pv=${pentoo}
 #########################################################################################
 setup_resolv
+charoot
+do-portage
+unchroot
 pack_stage5
-pack_shards
 unsquashfs_rootfs
 FINAL_clean
+build_docker
+push_docker
 
 ########################## fix /etc/resolv.conf to work as Docker LXC, Chroot etc. 
 setup_resolv() {
-    cat >>${ $dir[$i]}/etc/resolv.conf <<EOF
+spiner
+    cat >>${#dir[@]}/etc/resolv.conf <<EOF
 nameserver 8.8.8.8 
 nameserver 8.8.4.4 
 nameserver 2001:4860:4860::8888 
@@ -73,15 +63,62 @@ nameserver 2001:4860:4860::8844
 EOF
 ## should be persistive globally, google public dns else others will update# 
 }
+#################
+charoot() {
+spiner
+# https://wiki.gentoo.org/wiki/User:Zeekec/schroot
+for (( i = 0 ; i < ${#dir[@]} ; i++ ))
+do
 
+mount --rbind /dev ${#dir[@]}/dev
+mount --make-rslave ${#dir[@]}/dev
+mount -t proc /proc ${#dir[@]}/proc
+mount --rbind /sys ${#dir[@]}/sys
+mount --make-rslave ${#dir[@]}/sys
+mount --rbind /tmp ${#dir[@]}/tmp
+}
+
+do-portage() {
+spiner
+#emerge --ask dev-util/schroot can run as a user level chronjob, emerge-webrsync in trees +pentoo should be ok. 
+## run a few cmd's to fetch updates and not be in all day. 
+for (( i = 0 ; i < ${#dir[@]} ; i++ ))
+do schroot emerge-webrsync && emerge --sync pentoo && emerge app-eselect/eselect-repository
+} 
+unchroot() {
+# https://wiki.gentoo.org/wiki/User:Zeekec/schroot
+spiner
+for (( i = 0 ; i < ${#dir[@]} ; i++ ))
+do
+
+umount --rbind /dev ${#dir[@]}/dev
+umount --make-rslave ${#dir[@]}/dev
+umount -t proc /proc ${#dir[@]}/proc
+umount --rbind /sys ${#dir[@]}/sys
+umount --make-rslave ${#dir[@]}/sys
+umount --rbind /tmp ${#dir[@]}/tmp
+}
+
+if
+while true dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
+
+else
+if
+while dir[1]=/tmp/pentoo-amd64-hardened
+
+else
+}
+
+
+
+###################
 pack_stage5() {
 
 for (( i = 0 ; i < ${#dir[@]} ; i++ ))
 do
         mkdir /home/pentoo/stage5/
         tar -cvpzf /home/pentoo/stage5/pentoo-amd64-default.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
-        tar -cvpzf /home/pentoo/stage5/pentoo-amd64-hardened.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-hardened-default
-        tar -cvpzf /home/pentoo/stage5/pentoo-x86-default.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-x86-default
+
         tar -cvpzf /home/pentoo/stage5/pentoo-x86-hardened.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
 done
 
@@ -91,23 +128,7 @@ done
 ############## build "shards" just if the files to big offten dockerhub will crash the machine during build. 
 # cat *tar.gz* | tar -xvpzf - -C / 
 
-pack_shards () {
 
-       mkdir /home/pentoo/shards/$PV
- 
-      # | split -d -b 450m - /home/pentoo/shards/
-}
-# srv mmm salty (saltstack pilars etc...) 
-packArray=( bin boot etc home lib32 lib64 opt root run sbin media  usr var srv )
-# split 
-packArray=( dev media mnt tmp  var srv )
-tar -cvpzf VARS$$$ --exclude=
-# chuck to a few KB file.
-for packArray in ${packArray[*]}
-for packArray1 in ${packArray[*]}
-do
-  mkdir -p /home/$customerName/{outbound,outbound_backup,dropoff}
-done
 
 ################### FINAL Clean out clean out all the temp files in rootfs dirs. 
 FINAL_clean() {

@@ -17,10 +17,8 @@
 ### Brought to you by Necrose99 , Put a Scythe to your problem shall we...
 #####################################################################################
 
-dir[0]=/tmp/pentoo-amd64-default 
-dir[1]=/tmp/pentoo-amd64-hardened
-dir[2]=/tmp/pentoo-x86-default 
-dir[3]=/tmp/pentoo-x86-hardened
+dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
+dir[1]=/tmp/pentoo-full-beta-x86-hardened-latest
 
 #########################################################################################
 unpack_iso

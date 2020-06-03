@@ -9,20 +9,22 @@
 #
 ####################
 
-dir[0]=/tmp/pentoo-amd64-default 
-dir[1]=/tmp/pentoo-amd64-hardened
-dir[2]=/tmp/pentoo-x86-default 
-dir[3]=/tmp/pentoo-x86-hardened
+dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
+dir[1]=/tmp/pentoo-full-beta-x86-hardened-latest
+# https://pentoo.osuosl.org/latest-iso-symlinks/Daily/pentoo-full-beta-x86-hardened-latest.iso
+
+#########################################################################################
+
 for (( i = 0 ; i < ${#dir[@]} ; i++ ))
 do
         mkdir ${ $dir[$i]}
 done
-mirror=http://mirror.switch.ch/ftp/mirror/pentoo/latest-iso-symlinks/
+mirror=https://pentoo.osuosl.org/latest-iso-symlinks/Daily/
+# https://pentoo.osuosl.org/latest-iso-symlinks/Daily/pentoo-beta-amd64-hardened-latest.iso
   
-file[0]=pentoo-amd64-default.iso 
-file[1]=pentoo-amd64-hardened.iso
-file[2]=pentoo-x86-default.iso 
-file[3]=pentoo-x86-hardened.iso
+file[0]=pentoo-full-beta-amd64-hardened-latest.iso 
+file[1]=pentoo-full-beta-x86-hardened-latest.iso
+
 
 for (( i = 0 ; i < ${#file[@]} ; i++ ))
 do
