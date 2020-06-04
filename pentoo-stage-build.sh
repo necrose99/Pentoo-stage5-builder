@@ -17,9 +17,13 @@
 ### Brought to you by Necrose99 , Put a Scythe to your problem shall we...
 # some items swiped from https://github.com/greglook/toolkit-packages/blob/master/gentoo/stage4-backup.sh or inspired by/of. 
 #####################################################################################
+source fetcher.sh
+source unsqasher.sh
 
-dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
-dir[1]=/tmp/pentoo-full-beta-x86-hardened-latest
+########################
+
+dir[0]=/home/pentoo./tmp/pentoo-full-beta-amd64-hardened-latest
+dir[1]=/home/pentoo./tmp/pentoo-full-beta-x86-hardened-latest
 
 ################################ spinner function , sure thiers a prettier way with cut /tmp = archive name but for now its more work
 spiner() {
@@ -28,7 +32,7 @@ while true dir[0]=/tmp/pentoo-full-beta-amd64-hardened-latest
 
 else
 if
-while dir[1]=/tmp/pentoo-amd64-hardened
+while dir[1]=/tmp/pentoo-full-beta-x86-hardened-latest
 fi
 
 }
@@ -36,12 +40,14 @@ fi
 stage5Location=${STAGE5_LOCATION:-$HOME/stage5/$pv/}
 
 # name prefix
-stage5prefix=`pentoo`-stage5-`date +\%Y.\%m.\%d`
-#shards 
+stage5prefix="pentoo-stage5-"
 stage5shards=${STAGE5_LOCATION:-$HOME/stage5/$pv/}
 pentoo=${arch}${stub}
 pv=${pentoo}
+
 #########################################################################################
+fetch_iso
+unsqasher
 setup_resolv
 charoot
 do-portage
@@ -117,16 +123,15 @@ pack_stage5() {
 for (( i = 0 ; i < ${#dir[@]} ; i++ ))
 do
         mkdir /home/pentoo/stage5/
-        tar -cvpzf /home/pentoo/stage5/pentoo-amd64-default.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
+        tar -cvpzf /home/pentoo/stage5/pentoo-full-beta-amd64-hardened-latest.tar.gz --exclude=/backup.tar.gz --one-file-system /home/pentoo./tmp/pentoo-full-beta-amd64-hardened-latest
 
-        tar -cvpzf /home/pentoo/stage5/pentoo-x86-hardened.tar.gz --exclude=/backup.tar.gz --one-file-system /tmp/pentoo-amd64-default
+        tar -cvpzf /home/pentoo/stage5/pentoo-x86-hardened-latest.tar.gz --exclude=/backup.tar.gz --one-file-system /home/pentoo./tmp/pentoo-amd64-default
 done
 
 }
 
 
-############## build "shards" just if the files to big offten dockerhub will crash the machine during build. 
-# cat *tar.gz* | tar -xvpzf - -C / 
+
 
 
 
@@ -147,14 +152,3 @@ unset dir
 
 fi 
 
-
-# create the final command
-if [ "$tar_output" == "--file" ]; then
-	tar_command="$find_command | $tar $zip $tarOptions $verbose --file $stage4Name.$stage4postfix --no-recursion -T -"
-else
-	tar_command="$find_command | $tar $zip $tarOptions $verbose --no-recursion -T - | split $split_options - "$stage4Name.$stage4postfix"_"
-fi
-
-if [ "$verbose" ]; then
-	echo -ne "\n* creating the stage4 in $stage4Location with the following command:\n\n"$tar_command
-fi
